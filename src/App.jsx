@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 // --- DATA STRUCTURES ---
 
 const USERS = [
-  { username: 'm.osama01', password: '123456', name: 'Administrator' },
-  { username: 'm.daniyal01', password: '123456', name: 'Senior Analyst' },
-  { username: 'm.akhtar01', password: '123456', name: 'Guest Viewer' }
+  { username: 'm.osama01', password: '123456', name: 'Muhammad Osama' },
+  { username: 'm.daniyal01', password: '123456', name: 'Danish' },
+  { username: 'm.akhtar01', password: '123456', name: 'Akhtar Usman' }
 ];
 
 const PROFILES = {
@@ -328,6 +328,7 @@ const SearchView = ({ profiles, addLog }) => {
     }, 1500);
   };
 
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8 flex gap-4">
@@ -335,7 +336,7 @@ const SearchView = ({ profiles, addLog }) => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter Subject ID (e.g., 1001)"
+          placeholder="Enter CNIC or Mobile No."
           className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
         <button
