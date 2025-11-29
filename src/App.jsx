@@ -33,7 +33,7 @@ const PROFILES = {
         { model: "Toyota Yaris", year: 2022, plate: "XYZ-789", lastSeen: "2 hours ago near Firdous Market Signal" },
         { model: "Honda Civic", year: 2018, plate: "ABC-123", lastSeen: "7 months ago in Bahria Town" }
       ],
-      other_assets: ["Stock Portfolio (Value: $500k+)", "Private Art Collection"]
+      other_assets: ["Stock Portfolio (Value: Rs50K+)", "Private Art Collection"]
     },
     online_presence: {
       isSellingAssetsOnline: true,
@@ -48,7 +48,7 @@ const PROFILES = {
       name: "Maria Ibrahim",
       dob: "1992-08-15",
       taxPayer: true,
-      lastSeenLocation: "34.0522° N, 118.2437° W (Los Angeles)",
+      lastSeenLocation: "Karachi",
     },
     identity_card_history: {
       issueDate: "2012-06-10",
@@ -59,11 +59,12 @@ const PROFILES = {
     },
     assets: {
       properties: [
-        { type: "Residential Plot", address: "789 Palm Dr", status: "Muridke" }
+        { type: "Residential Plot", address: "789 Palm Dr", status: "Karachi" }
       ],
       vehicles: [
         { model: "Toyota Passo", year: 2015, plate: "ELN-456", lastSeen: "10 mins ago at Liberty Station" }
       ],
+        other_assets: [""]
     },
     online_presence: {
       isSellingAssetsOnline: false,
