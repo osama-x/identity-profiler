@@ -26,7 +26,7 @@ const PROFILES = {
     },
     assets: {
       properties: [
-        { type: "Residential Plot", address: "34-4 Main St", status: "Gulberg3, Gulberg Lahore" },
+        { type: "Residential Plot", address: "34-4 Main St", status: "Gulberg 3, Gulberg, Lahore" },
         { type: "House", address: "45-B River Block", status: "Bahria Town Lahore" }
       ],
       vehicles: [
