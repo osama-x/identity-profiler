@@ -47,7 +47,7 @@ const PROFILES = {
     personal: {
       name: "Maria Ibrahim",
       dob: "1992-08-15",
-      taxPayer: true,
+      taxPayer: false,
       lastSeenLocation: "Karachi",
     },
     identity_card_history: {
@@ -73,7 +73,7 @@ const PROFILES = {
   },
   "34428645236975": {
     personal: {
-      name: "John Doe",
+      name: "Muhammad Jameel",
       dob: "1975-02-28",
       taxPayer: false,
       lastSeenLocation: "Unknown",
