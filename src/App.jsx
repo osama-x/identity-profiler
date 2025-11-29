@@ -124,20 +124,20 @@ const PROFILES = {
 
 const INITIAL_AUDIT_LOGS = [
   { timestamp: "2025-11-28 10:00", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 10:05", user: "m.daniyal01", action: "Searched Profile ID: 1005" },
+  { timestamp: "2025-11-28 10:05", user: "m.daniyal01", action: "Searched Profile ID: 34428645236976" },
   { timestamp: "2025-11-28 10:15", user: "m.osama01", action: "Viewed Audit Logs" },
   { timestamp: "2025-11-28 10:30", user: "vieanalystwer", action: "Login successful" },
-  { timestamp: "2025-11-28 10:35", user: "m.osama01", action: "Searched Profile ID: 1001" },
+  { timestamp: "2025-11-28 10:35", user: "m.osama01", action: "Searched Profile ID: 34428645236976" },
   { timestamp: "2025-11-28 11:00", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 11:10", user: "m.daniyal01", action: "Searched Profile ID: 1002" },
+  { timestamp: "2025-11-28 11:10", user: "m.daniyal01", action: "Searched Profile ID: 0321452364" },
   { timestamp: "2025-11-28 11:20", user: "m.osama01", action: "Exported Report" },
   { timestamp: "2025-11-28 12:00", user: "m.osama01", action: "Daily Backup" },
   { timestamp: "2025-11-28 12:30", user: "admin", action: "Login successful" },
-  { timestamp: "2025-11-28 13:00", user: "m.osama01", action: "Searched Profile ID: 1003" },
-  { timestamp: "2025-11-28 13:15", user: "m.osama01", action: "Flagged Profile ID: 1003" },
+  { timestamp: "2025-11-28 13:00", user: "m.osama01", action: "Searched Profile ID: 34428645236976" },
+  { timestamp: "2025-11-28 13:15", user: "m.osama01", action: "Flagged Profile ID: 34428645236976" },
   { timestamp: "2025-11-28 14:00", user: "viewer", action: "Login failed" },
   { timestamp: "2025-11-28 14:05", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 14:10", user: "m.daniyal01", action: "Searched Profile ID: 1001" }
+  { timestamp: "2025-11-28 14:10", user: "m.daniyal01", action: "Searched Profile ID: 34428645236976" }
 ];
 
 // --- COMPONENTS ---
