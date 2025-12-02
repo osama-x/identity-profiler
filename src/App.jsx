@@ -17,7 +17,7 @@ const PROFILES = {
       dob: "1980-05-20",
       taxPayer: true,
       lastSeenLocation: "Lahore",
-      criminalRecord: "Clear",
+      criminalRecord: "Found",
     },
     identity_card_history: {
       issueDate: "2010-01-15",
@@ -44,7 +44,10 @@ const PROFILES = {
         { platform: "Zameen.com", items: 2, lastActivity: "2025-11-28" },
         { platform: "OLX", items: 1, lastActivity: "2023-10-01" }
       ]
-    }
+    },
+    criminalHistory: [
+      { date: "2024-03-10", offense: "Violation of Kite Flying Ban (Punjab Prohibition of Kite Flying Ordinance)", station: "Gulberg PS", status: "Convicted - Fine Paid" }
+    ]
   },
   "34428645236976": {
     personal: {
@@ -73,7 +76,8 @@ const PROFILES = {
     online_presence: {
       isSellingAssetsOnline: false,
       platforms: []
-    }
+    },
+    criminalHistory: []
   },
   "34428645236975": {
     personal: {
@@ -96,7 +100,8 @@ const PROFILES = {
     online_presence: {
       isSellingAssetsOnline: false,
       platforms: []
-    }
+    },
+    criminalHistory: []
   },
   // Generating more dummy profiles...
   ...Array.from({ length: 7 }).reduce((acc, _, i) => {
@@ -122,7 +127,8 @@ const PROFILES = {
       online_presence: {
         isSellingAssetsOnline: false,
         platforms: []
-      }
+      },
+      criminalHistory: []
     };
     return acc;
   }, {})
@@ -349,7 +355,7 @@ const SearchView = ({ profiles, addLog }) => {
         <button
           onClick={handleSearch}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg disabled:opacity-50 transition"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-lg disabled:opacity-50 transition"
         >
           {loading ? 'Scanning...' : 'Search'}
         </button>
@@ -359,7 +365,7 @@ const SearchView = ({ profiles, addLog }) => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setSearchMode('identity')}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'identity' ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'identity' ? 'bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
           >
             Identity Profile
           </button>
@@ -500,24 +506,24 @@ const SearchView = ({ profiles, addLog }) => {
               </div>
 
               <div className="col-span-1 md:col-span-2">
-                <Card title="Vehicle Details">
-                  {result.assets.vehicles.length === 0 ? <p className="text-gray-500 italic">No vehicles found.</p> : (
+                <Card title="Criminal History">
+                  {(!result.criminalHistory || result.criminalHistory.length === 0) ? <p className="text-gray-500 italic">No criminal history recorded.</p> : (
                     <table className="w-full text-sm text-left">
                       <thead className="text-gray-500 border-b border-gray-700">
                         <tr>
-                          <th className="py-2">Model</th>
-                          <th className="py-2">Year</th>
-                          <th className="py-2">Plate</th>
-                          <th className="py-2">Last Seen</th>
+                          <th className="py-2">Date</th>
+                          <th className="py-2">Offense</th>
+                          <th className="py-2">Police Station</th>
+                          <th className="py-2">Status</th>
                         </tr>
                       </thead>
                       <tbody className="text-gray-300">
-                        {result.assets.vehicles.map((v, i) => (
+                        {result.criminalHistory.map((rec, i) => (
                           <tr key={i} className="border-b border-gray-700/50 last:border-0">
-                            <td className="py-2">{v.model}</td>
-                            <td className="py-2">{v.year}</td>
-                            <td className="py-2 font-mono text-xs">{v.plate}</td>
-                            <td className="py-2 text-yellow-500/80">{v.lastSeen}</td>
+                            <td className="py-2 font-mono text-gray-400">{rec.date}</td>
+                            <td className="py-2 text-red-300">{rec.offense}</td>
+                            <td className="py-2">{rec.station}</td>
+                            <td className="py-2"><span className="bg-red-900/40 text-red-200 px-2 py-0.5 rounded text-xs border border-red-900">{rec.status}</span></td>
                           </tr>
                         ))}
                       </tbody>
