@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import CDRView from './components/CDRView';
 
 // --- DATA STRUCTURES ---
 
 const USERS = [
-  { username: 'm.osama01', password: '123456', name: 'Muhammad Osama' },
+  { username: 'aa', password: 'aa', name: 'Muhammad Osama' },
   { username: 'm.daniyal01', password: '123456', name: 'Danish' },
   { username: 'm.akhtar01', password: '123456', name: 'Akhtar Usman' }
 ];
@@ -64,7 +65,7 @@ const PROFILES = {
       vehicles: [
         { model: "Toyota Passo", year: 2015, plate: "ELN-456", lastSeen: "10 mins ago at Liberty Station" }
       ],
-        other_assets: [""]
+      other_assets: [""]
     },
     online_presence: {
       isSellingAssetsOnline: false,
@@ -137,7 +138,6 @@ const INITIAL_AUDIT_LOGS = [
   { timestamp: "2025-11-28 13:15", user: "m.osama01", action: "Flagged Profile ID: 34428645236976" },
   { timestamp: "2025-11-28 14:00", user: "viewer", action: "Login failed" },
   { timestamp: "2025-11-28 14:05", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 14:10", user: "m.daniyal01", action: "Searched Profile ID: 34428645236976" }
 ];
 
 // --- COMPONENTS ---
@@ -313,6 +313,7 @@ const SearchView = ({ profiles, addLog }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [searchMode, setSearchMode] = useState('identity'); // 'identity' or 'cdr'
 
   const handleSearch = () => {
     if (!query) return;
@@ -349,143 +350,166 @@ const SearchView = ({ profiles, addLog }) => {
         </button>
       </div>
 
-      {loading && (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-blue-400 animate-pulse">Running deep background checks...</p>
-        </div>
-      )}
-
-      {!loading && searched && !result && (
-        <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-8 text-center">
-          <h3 className="text-xl text-red-400 font-bold mb-2">Subject Not Found</h3>
-          <p className="text-gray-400">No records found for ID: {query}</p>
-        </div>
-      )}
-
       {!loading && result && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Identity Overview */}
-          <Card title="Identity Overview">
-            <div className="space-y-3">
-              <DetailRow label="Full Name" value={result.personal.name} />
-              <DetailRow label="DOB" value={result.personal.dob} />
-              <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
-              <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
-            </div>
-          </Card>
-
-          {/* ID History */}
-          <Card title="Identity Card History">
-            <div className="mb-4">
-              <DetailRow label="Issued" value={result.identity_card_history.issueDate} />
-              <DetailRow label="Renewal" value={result.identity_card_history.renewalDate} />
-            </div>
-            <h4 className="text-sm font-semibold text-gray-400 mb-2">Change Log</h4>
-            <div className="space-y-2">
-              {result.identity_card_history.history.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">No history recorded</p>
-              ) : (
-                result.identity_card_history.history.map((h, i) => (
-                  <div key={i} className="text-sm bg-gray-700/50 p-2 rounded">
-                    <span className="text-blue-400">{h.date}</span>: {h.change}
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
-
-          {/* Assets Overview */}
-          <Card title="Assets Overview">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-gray-700/30 p-4 rounded">
-                <div className="text-2xl font-bold text-white">{result.assets.properties.length}</div>
-                <div className="text-xs text-gray-400 uppercase">Properties</div>
-              </div>
-              <div className="bg-gray-700/30 p-4 rounded">
-                <div className="text-2xl font-bold text-white">{result.assets.vehicles.length}</div>
-                <div className="text-xs text-gray-400 uppercase">Vehicles</div>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h4 className="text-sm font-semibold text-gray-400 mb-2">Other Assets</h4>
-              <ul className="list-disc list-inside text-sm text-gray-300">
-                {result.assets.other_assets.map((asset, i) => (
-                  <li key={i}>{asset}</li>
-                ))}
-              </ul>
-            </div>
-          </Card>
-
-          {/* Online Presence */}
-          <Card title="Online Presence">
-            <div className={`p-3 rounded mb-4 text-center ${result.online_presence.isSellingAssetsOnline ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-900/50' : 'bg-green-900/30 text-green-400 border border-green-900/50'}`}>
-              {result.online_presence.isSellingAssetsOnline ? '⚠ Active Seller Activity Detected' : '✓ No Suspicious Activity'}
-            </div>
-            {result.online_presence.platforms.map((p, i) => (
-              <div key={i} className="flex justify-between items-center text-sm border-b border-gray-700 py-2 last:border-0">
-                <span className="font-medium text-white">{p.platform}</span>
-                <div className="text-right">
-                  <div className="text-gray-300">{p.items} items</div>
-                  <div className="text-xs text-gray-500">{p.lastActivity}</div>
-                </div>
-              </div>
-            ))}
-          </Card>
-
-          {/* Detailed Lists (Full Width) */}
-          <div className="col-span-1 md:col-span-2">
-            <Card title="Property Details">
-              {result.assets.properties.length === 0 ? <p className="text-gray-500 italic">No properties found.</p> : (
-                <table className="w-full text-sm text-left">
-                  <thead className="text-gray-500 border-b border-gray-700">
-                    <tr>
-                      <th className="py-2">Type</th>
-                      <th className="py-2">Address</th>
-                      <th className="py-2">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {result.assets.properties.map((p, i) => (
-                      <tr key={i} className="border-b border-gray-700/50 last:border-0">
-                        <td className="py-2">{p.type}</td>
-                        <td className="py-2">{p.address}</td>
-                        <td className="py-2"><span className="bg-gray-700 px-2 py-0.5 rounded text-xs">{p.status}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Card>
-          </div>
-
-          <div className="col-span-1 md:col-span-2">
-            <Card title="Vehicle Details">
-              {result.assets.vehicles.length === 0 ? <p className="text-gray-500 italic">No vehicles found.</p> : (
-                <table className="w-full text-sm text-left">
-                  <thead className="text-gray-500 border-b border-gray-700">
-                    <tr>
-                      <th className="py-2">Model</th>
-                      <th className="py-2">Year</th>
-                      <th className="py-2">Plate</th>
-                      <th className="py-2">Last Seen</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {result.assets.vehicles.map((v, i) => (
-                      <tr key={i} className="border-b border-gray-700/50 last:border-0">
-                        <td className="py-2">{v.model}</td>
-                        <td className="py-2">{v.year}</td>
-                        <td className="py-2 font-mono text-xs">{v.plate}</td>
-                        <td className="py-2 text-yellow-500/80">{v.lastSeen}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Card>
-          </div>
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setSearchMode('identity')}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'identity' ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+          >
+            Identity Profile
+          </button>
+          <button
+            onClick={() => setSearchMode('cdr')}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'cdr' ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+          >
+            CDR Intel Search
+          </button>
         </div>
+      )}
+
+      {searchMode === 'cdr' ? (
+        <CDRView />
+      ) : (
+        <>
+          {loading && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-blue-400 animate-pulse">Running deep background checks...</p>
+            </div>
+          )}
+
+          {!loading && searched && !result && (
+            <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-8 text-center">
+              <h3 className="text-xl text-red-400 font-bold mb-2">Subject Not Found</h3>
+              <p className="text-gray-400">No records found for ID: {query}</p>
+            </div>
+          )}
+
+          {!loading && result && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Identity Overview */}
+              <Card title="Identity Overview">
+                <div className="space-y-3">
+                  <DetailRow label="Full Name" value={result.personal.name} />
+                  <DetailRow label="DOB" value={result.personal.dob} />
+                  <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
+                  <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
+                </div>
+              </Card>
+
+              {/* ID History */}
+              <Card title="Identity Card History">
+                <div className="mb-4">
+                  <DetailRow label="Issued" value={result.identity_card_history.issueDate} />
+                  <DetailRow label="Renewal" value={result.identity_card_history.renewalDate} />
+                </div>
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">Change Log</h4>
+                <div className="space-y-2">
+                  {result.identity_card_history.history.length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">No history recorded</p>
+                  ) : (
+                    result.identity_card_history.history.map((h, i) => (
+                      <div key={i} className="text-sm bg-gray-700/50 p-2 rounded">
+                        <span className="text-blue-400">{h.date}</span>: {h.change}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </Card>
+
+              {/* Assets Overview */}
+              <Card title="Assets Overview">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="bg-gray-700/30 p-4 rounded">
+                    <div className="text-2xl font-bold text-white">{result.assets.properties.length}</div>
+                    <div className="text-xs text-gray-400 uppercase">Properties</div>
+                  </div>
+                  <div className="bg-gray-700/30 p-4 rounded">
+                    <div className="text-2xl font-bold text-white">{result.assets.vehicles.length}</div>
+                    <div className="text-xs text-gray-400 uppercase">Vehicles</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Other Assets</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-300">
+                    {result.assets.other_assets.map((asset, i) => (
+                      <li key={i}>{asset}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
+
+              {/* Online Presence */}
+              <Card title="Online Presence">
+                <div className={`p-3 rounded mb-4 text-center ${result.online_presence.isSellingAssetsOnline ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-900/50' : 'bg-green-900/30 text-green-400 border border-green-900/50'}`}>
+                  {result.online_presence.isSellingAssetsOnline ? '⚠ Active Seller Activity Detected' : '✓ No Suspicious Activity'}
+                </div>
+                {result.online_presence.platforms.map((p, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm border-b border-gray-700 py-2 last:border-0">
+                    <span className="font-medium text-white">{p.platform}</span>
+                    <div className="text-right">
+                      <div className="text-gray-300">{p.items} items</div>
+                      <div className="text-xs text-gray-500">{p.lastActivity}</div>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+
+              {/* Detailed Lists (Full Width) */}
+              <div className="col-span-1 md:col-span-2">
+                <Card title="Property Details">
+                  {result.assets.properties.length === 0 ? <p className="text-gray-500 italic">No properties found.</p> : (
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-gray-500 border-b border-gray-700">
+                        <tr>
+                          <th className="py-2">Type</th>
+                          <th className="py-2">Address</th>
+                          <th className="py-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-gray-300">
+                        {result.assets.properties.map((p, i) => (
+                          <tr key={i} className="border-b border-gray-700/50 last:border-0">
+                            <td className="py-2">{p.type}</td>
+                            <td className="py-2">{p.address}</td>
+                            <td className="py-2"><span className="bg-gray-700 px-2 py-0.5 rounded text-xs">{p.status}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </Card>
+              </div>
+
+              <div className="col-span-1 md:col-span-2">
+                <Card title="Vehicle Details">
+                  {result.assets.vehicles.length === 0 ? <p className="text-gray-500 italic">No vehicles found.</p> : (
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-gray-500 border-b border-gray-700">
+                        <tr>
+                          <th className="py-2">Model</th>
+                          <th className="py-2">Year</th>
+                          <th className="py-2">Plate</th>
+                          <th className="py-2">Last Seen</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-gray-300">
+                        {result.assets.vehicles.map((v, i) => (
+                          <tr key={i} className="border-b border-gray-700/50 last:border-0">
+                            <td className="py-2">{v.model}</td>
+                            <td className="py-2">{v.year}</td>
+                            <td className="py-2 font-mono text-xs">{v.plate}</td>
+                            <td className="py-2 text-yellow-500/80">{v.lastSeen}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </Card>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
