@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CDRView from './components/CDRView';
 import TravelHistoryView from './components/TravelHistoryView';
+import AdvancedScanView from './components/AdvancedScanView';
 
 // --- DATA STRUCTURES ---
 
@@ -322,13 +323,14 @@ const SearchView = ({ profiles, addLog }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [searched, setSearched] = useState(false);
-  const [searchMode, setSearchMode] = useState('identity'); // 'identity' or 'cdr'
-
+  const [searchMode, setSearchMode] = useState('identity'); // 'identity' or 'cdr' or 'travel' or 'advanced'
+  const [scanning, setScanning] = useState(false);
   const handleSearch = () => {
     if (!query) return;
     setLoading(true);
     setSearched(true);
     setResult(null);
+    setScanning(false);
 
     // Simulate API call
     setTimeout(() => {
@@ -337,6 +339,14 @@ const SearchView = ({ profiles, addLog }) => {
       setLoading(false);
       addLog(`Searched Profile ID: ${query}`);
     }, 1500);
+  };
+
+  const handleAdvancedScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      setSearchMode('advanced');
+    }, 2000);
   };
 
 
@@ -371,7 +381,7 @@ const SearchView = ({ profiles, addLog }) => {
             onClick={() => setSearchMode('cdr')}
             className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'cdr' ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
           >
-            CDR Intel Search
+            CDR Intel
           </button>
           <button
             onClick={() => setSearchMode('travel')}
@@ -379,11 +389,19 @@ const SearchView = ({ profiles, addLog }) => {
           >
             Travel History
           </button>
+          <button
+            onClick={handleAdvancedScan}
+            disabled={scanning}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'advanced' ? 'bg-fuchsia-600 text-white shadow-lg ring-2 ring-fuchsia-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'} disabled:opacity-50`}
+          >
+            {scanning ? 'Scanning...' : 'Advanced Scan'}
+          </button>
         </div>
       )}
 
       {searchMode === 'cdr' && <CDRView />}
       {searchMode === 'travel' && <TravelHistoryView />}
+      {searchMode === 'advanced' && <AdvancedScanView />}
 
       {searchMode === 'identity' && (
         <>
