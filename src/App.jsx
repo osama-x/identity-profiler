@@ -17,7 +17,7 @@ const PROFILES = {
       dob: "1980-05-20",
       taxPayer: true,
       lastSeenLocation: "Lahore",
-      criminalRecord: "Found",
+      criminalRecord: "Clear",
     },
     identity_card_history: {
       issueDate: "2010-01-15",
@@ -135,20 +135,18 @@ const PROFILES = {
 };
 
 const INITIAL_AUDIT_LOGS = [
-  { timestamp: "2025-11-28 10:00", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 10:05", user: "m.daniyal01", action: "Searched Profile ID: 34428645236976" },
-  { timestamp: "2025-11-28 10:15", user: "m.osama01", action: "Viewed Audit Logs" },
-  { timestamp: "2025-11-28 10:30", user: "vieanalystwer", action: "Login successful" },
-  { timestamp: "2025-11-28 10:35", user: "m.osama01", action: "Searched Profile ID: 34428645236976" },
-  { timestamp: "2025-11-28 11:00", user: "m.osama01", action: "Login successful" },
-  { timestamp: "2025-11-28 11:10", user: "m.daniyal01", action: "Searched Profile ID: 0321452364" },
-  { timestamp: "2025-11-28 11:20", user: "m.osama01", action: "Exported Report" },
-  { timestamp: "2025-11-28 12:00", user: "m.osama01", action: "Daily Backup" },
-  { timestamp: "2025-11-28 12:30", user: "admin", action: "Login successful" },
-  { timestamp: "2025-11-28 13:00", user: "m.osama01", action: "Searched Profile ID: 34428645236976" },
-  { timestamp: "2025-11-28 13:15", user: "m.osama01", action: "Flagged Profile ID: 34428645236976" },
-  { timestamp: "2025-11-28 14:00", user: "viewer", action: "Login failed" },
-  { timestamp: "2025-11-28 14:05", user: "m.osama01", action: "Login successful" },
+  { timestamp: "2025-11-28 09:15", user: "Muhammad Osama", action: "Accessed Identity Profile for Subject: 34428645236974 (Reason: Suspicious Activity Report)" },
+  { timestamp: "2025-11-28 09:30", user: "Muhammad Osama", action: "Analyzed CDR Data for ID: 34428645236974 (Cross-referencing location)" },
+  { timestamp: "2025-11-28 10:05", user: "Muhammad Daniyal", action: "Retrieved Travel History for: 34428645236976 (Routine Clearance)" },
+  { timestamp: "2025-11-28 11:20", user: "Muhammad Akhtar", action: "Exported Vehicle Movement Logs for: 34428645236974" },
+  { timestamp: "2025-11-28 14:45", user: "Muhammad Osama", action: "Flagged Suspicious Transaction for ID: 34428645236975" },
+  { timestamp: "2025-11-28 16:10", user: "Muhammad Daniyal", action: "Generated Surveillance Report #4452" },
+  { timestamp: "2025-11-29 08:40", user: "Fatima Zahra", action: "Verified Biometric Signature for Subject: 34428645236976" },
+  { timestamp: "2025-11-29 09:55", user: "Ali Ahmed", action: "Updated Watchlist Status for ID: 34428645236974 (Priority: High)" },
+  { timestamp: "2025-11-29 12:10", user: "Ayesha Khan", action: "Created new case file (Case-2025-0012) linked to ID: 34428645236975" },
+  { timestamp: "2025-11-29 15:30", user: "Muhammad Daniyal", action: "Requested server logs from asset 'Karachi-Tower-05'" },
+  { timestamp: "2025-11-29 17:00", user: "Fatima Zahra", action: "Closed initial report for ID: 34428645236976 (Status: Cleared)" },
+  { timestamp: "2025-11-30 10:25", user: "Ali Ahmed", action: "Scheduled follow-up physical surveillance on ID: 34428645236974" }
 ];
 
 // --- COMPONENTS ---
