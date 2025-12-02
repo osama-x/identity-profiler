@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CDRView from './components/CDRView';
+import TravelHistoryView from './components/TravelHistoryView';
 
 // --- DATA STRUCTURES ---
 
@@ -16,6 +17,7 @@ const PROFILES = {
       dob: "1980-05-20",
       taxPayer: true,
       lastSeenLocation: "Lahore",
+      criminalRecord: "Clear",
     },
     identity_card_history: {
       issueDate: "2010-01-15",
@@ -50,6 +52,7 @@ const PROFILES = {
       dob: "1992-08-15",
       taxPayer: false,
       lastSeenLocation: "Karachi",
+      criminalRecord: "Found",
     },
     identity_card_history: {
       issueDate: "2012-06-10",
@@ -78,6 +81,7 @@ const PROFILES = {
       dob: "1975-02-28",
       taxPayer: false,
       lastSeenLocation: "Unknown",
+      criminalRecord: "Clear",
     },
     identity_card_history: {
       issueDate: "2005-03-20",
@@ -103,6 +107,7 @@ const PROFILES = {
         dob: "1985-01-01",
         taxPayer: true,
         lastSeenLocation: "Various",
+        criminalRecord: "Clear",
       },
       identity_card_history: {
         issueDate: "2015-01-01",
@@ -360,16 +365,23 @@ const SearchView = ({ profiles, addLog }) => {
           </button>
           <button
             onClick={() => setSearchMode('cdr')}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'cdr' ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'cdr' ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
           >
             CDR Intel Search
+          </button>
+          <button
+            onClick={() => setSearchMode('travel')}
+            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'travel' ? 'bg-emerald-600 text-white shadow-lg ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+          >
+            Travel History
           </button>
         </div>
       )}
 
-      {searchMode === 'cdr' ? (
-        <CDRView />
-      ) : (
+      {searchMode === 'cdr' && <CDRView />}
+      {searchMode === 'travel' && <TravelHistoryView />}
+
+      {searchMode === 'identity' && (
         <>
           {loading && (
             <div className="text-center py-12">
@@ -394,6 +406,12 @@ const SearchView = ({ profiles, addLog }) => {
                   <DetailRow label="DOB" value={result.personal.dob} />
                   <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
                   <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
+                  <div className="flex justify-between text-sm items-center">
+                    <span className="text-gray-400">Criminal Record:</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${result.personal.criminalRecord === 'Found' ? 'bg-red-900 text-red-300 animate-pulse' : 'bg-green-900 text-green-300'}`}>
+                      {result.personal.criminalRecord === 'Found' ? 'CRIMINAL RECORD FOUND' : 'CLEAR'}
+                    </span>
+                  </div>
                 </div>
               </Card>
 
