@@ -6,9 +6,8 @@ import AdvancedScanView from './components/AdvancedScanView';
 // --- DATA STRUCTURES ---
 
 const USERS = [
-  { username: 'aa', password: 'aa', name: 'Muhammad Osama' },
-  { username: 'm.daniyal01', password: '123456', name: 'Danish' },
-  { username: 'm.akhtar01', password: '123456', name: 'Akhtar Usman' }
+  { username: 'aa', password: 'aa', name: 'Zafar Nazeer' },
+  { username: 'demo', password: '123456', name: 'Demo User' }
 ];
 
 const PROFILES = {
@@ -136,12 +135,12 @@ const PROFILES = {
 };
 
 const INITIAL_AUDIT_LOGS = [
-  { timestamp: "2025-11-28 09:15", user: "Muhammad Osama", action: "Accessed Identity Profile for Subject: 34428645236974 (Reason: Suspicious Activity Report)" },
-  { timestamp: "2025-11-28 09:30", user: "Muhammad Osama", action: "Analyzed CDR Data for ID: 34428645236974 (Cross-referencing location)" },
-  { timestamp: "2025-11-28 10:05", user: "Muhammad Daniyal", action: "Retrieved Travel History for: 34428645236976 (Routine Clearance)" },
-  { timestamp: "2025-11-28 11:20", user: "Muhammad Akhtar", action: "Exported Vehicle Movement Logs for: 34428645236974" },
-  { timestamp: "2025-11-28 14:45", user: "Muhammad Osama", action: "Flagged Suspicious Transaction for ID: 34428645236975" },
-  { timestamp: "2025-11-28 16:10", user: "Muhammad Daniyal", action: "Generated Surveillance Report #4452" },
+  { timestamp: "2025-11-28 09:15", user: "Zafar Nazeer", action: "Accessed Identity Profile for Subject: 34428645236974 (Reason: Suspicious Activity Report)" },
+  { timestamp: "2025-11-28 09:30", user: "Zafar Nazeer", action: "Analyzed CDR Data for ID: 34428645236974 (Cross-referencing location)" },
+  { timestamp: "2025-11-28 10:05", user: "Ali", action: "Retrieved Travel History for: 34428645236976 (Routine Clearance)" },
+  { timestamp: "2025-11-28 11:20", user: "Muhammad Ahmed", action: "Exported Vehicle Movement Logs for: 34428645236974" },
+  { timestamp: "2025-11-28 14:45", user: "Zafar Nazeer", action: "Flagged Suspicious Transaction for ID: 34428645236975" },
+  { timestamp: "2025-11-28 16:10", user: "Muhammad Ali", action: "Generated Surveillance Report #4452" },
   { timestamp: "2025-11-29 08:40", user: "Fatima Zahra", action: "Verified Biometric Signature for Subject: 34428645236976" },
   { timestamp: "2025-11-29 09:55", user: "Ali Ahmed", action: "Updated Watchlist Status for ID: 34428645236974 (Priority: High)" },
   { timestamp: "2025-11-29 12:10", user: "Ayesha Khan", action: "Created new case file (Case-2025-0012) linked to ID: 34428645236975" },
