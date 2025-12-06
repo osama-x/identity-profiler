@@ -1,9 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import CDRView from './components/CDRView';
 import TravelHistoryView from './components/TravelHistoryView';
-import AdvancedScanView from './components/AdvancedScanView';
+import GraphComponent from './components/GraphComponent/GraphComponent';
 
 // --- DATA STRUCTURES ---
+
+const sampleData = {
+  "nodes": [
+    {
+      "id": "IJAZ_KHAN",
+      "label": "Person",
+      "name": "Ijaz",
+      "surname": "Khan",
+      "city": "Lahore",
+      "relationship_type": "Primary",
+      "node_type": "primary"
+    },
+    {
+      "id": "FARID_KHAN",
+      "label": "Person",
+      "name": "Farid",
+      "surname": "Khan",
+      "dob": "1965-01-20",
+      "city": "Lahore",
+      "profession": "Retired Army Officer",
+      "relationship_type": "Family"
+    },
+    {
+      "id": "AISHA_FARID",
+      "label": "Person",
+      "name": "Aisha",
+      "surname": "Farid",
+      "dob": "1970-08-25",
+      "city": "Lahore",
+      "profession": "Homemaker",
+      "relationship_type": "Family"
+    },
+    {
+      "id": "AMIR_KHAN",
+      "label": "Person",
+      "name": "Amir",
+      "surname": "Khan",
+      "dob": "1998-07-03",
+      "city": "Karachi",
+      "profession": "Architect",
+      "relationship_type": "Family"
+    },
+    {
+      "id": "IMRAN_MALIK",
+      "label": "Contact",
+      "name": "Imran",
+      "surname": "Malik",
+      "city": "Islamabad",
+      "context": "Professional Colleague"
+    },
+    {
+      "id": "HINA_BUTT",
+      "label": "Contact",
+      "name": "Hina",
+      "surname": "Butt",
+      "city": "Faisalabad",
+      "context": "University Friend"
+    }
+  ],
+  "links": [
+    {
+      "source": "FARID_KHAN",
+      "target": "IJAZ_KHAN",
+      "type": "PARENT_OF",
+      "detail": "Father"
+    },
+    {
+      "source": "AISHA_FARID",
+      "target": "IJAZ_KHAN",
+      "type": "PARENT_OF",
+      "detail": "Mother"
+    },
+    {
+      "source": "IJAZ_KHAN",
+      "target": "AMIR_KHAN",
+      "type": "SIBLING_OF",
+      "detail": "Younger Brother"
+    },
+    {
+      "source": "IJAZ_KHAN",
+      "target": "IMRAN_MALIK",
+      "type": "CONTACTED",
+      "last_contact_date": "2025-11-28",
+      "platform": "Email"
+    },
+    {
+      "source": "IJAZ_KHAN",
+      "target": "HINA_BUTT",
+      "type": "CONTACTED",
+      "last_contact_date": "2025-12-04",
+      "platform": "WhatsApp"
+    }
+  ]
+};
 
 const USERS = [
   { username: 'aa', password: 'aa', name: 'Zafar Nazeer' },
@@ -14,17 +108,28 @@ const PROFILES = {
   "34428645236974": {
     personal: {
       name: "Ijaz Khan",
+      cnic: "34428-6452369-7",
       dob: "1980-05-20",
+      gender: "Male",
+      nationality: "Pakistani",
+      bloodGroup: "B+",
+      maritalStatus: "Married",
+      occupation: "Business Owner",
       taxPayer: true,
       lastSeenLocation: "Lahore",
       criminalRecord: "Clear",
+      profilePhoto: "/profile.png"
     },
     identity_card_history: {
       issueDate: "2010-01-15",
       renewalDate: "2020-01-15",
+      expiryDate: "2030-01-15",
+      cardNumber: "34428-6452369-7",
+      issuingAuthority: "NADRA Lahore",
       history: [
+        { date: "2010-01-15", change: "Initial CNIC issued" },
         { date: "2015-03-01", change: "Address updated (Source: Utility Bill)" },
-        { date: "2020-01-15", change: "Biometric renewal" }
+        { date: "2020-01-15", change: "Biometric renewal completed" }
       ]
     },
     assets: {
@@ -52,16 +157,28 @@ const PROFILES = {
   "34428645236976": {
     personal: {
       name: "Maria Ibrahim",
+      cnic: "34428-6452369-6",
       dob: "1992-08-15",
+      gender: "Female",
+      nationality: "Pakistani",
+      bloodGroup: "O+",
+      maritalStatus: "Married",
+      occupation: "Teacher",
       taxPayer: false,
       lastSeenLocation: "Karachi",
       criminalRecord: "Found",
+      profilePhoto: "/profile.png"
     },
     identity_card_history: {
       issueDate: "2012-06-10",
       renewalDate: "2022-06-10",
+      expiryDate: "2032-06-10",
+      cardNumber: "34428-6452369-6",
+      issuingAuthority: "NADRA Karachi",
       history: [
-        { date: "2018-11-05", change: "Name change (Marriage)" }
+        { date: "2012-06-10", change: "Initial CNIC issued" },
+        { date: "2018-11-05", change: "Name change (Marriage)" },
+        { date: "2022-06-10", change: "Biometric renewal completed" }
       ]
     },
     assets: {
@@ -77,20 +194,34 @@ const PROFILES = {
       isSellingAssetsOnline: false,
       platforms: []
     },
-    criminalHistory: []
+    criminalHistory: [
+      { date: "2023-05-12", offense: "Traffic Violation (Overspeeding)", station: "Clifton PS", status: "Fine Paid" }
+    ]
   },
   "34428645236975": {
     personal: {
       name: "Muhammad Jameel",
+      cnic: "34428-6452369-5",
       dob: "1975-02-28",
+      gender: "Male",
+      nationality: "Pakistani",
+      bloodGroup: "A+",
+      maritalStatus: "Single",
+      occupation: "Unemployed",
       taxPayer: false,
       lastSeenLocation: "Unknown",
       criminalRecord: "Clear",
+      profilePhoto: "/profile.png"
     },
     identity_card_history: {
       issueDate: "2005-03-20",
       renewalDate: "Expired",
-      history: []
+      expiryDate: "2015-03-20",
+      cardNumber: "34428-6452369-5",
+      issuingAuthority: "NADRA Islamabad",
+      history: [
+        { date: "2005-03-20", change: "Initial CNIC issued" }
+      ]
     },
     assets: {
       properties: [],
@@ -400,7 +531,11 @@ const SearchView = ({ profiles, addLog }) => {
 
       {searchMode === 'cdr' && <CDRView />}
       {searchMode === 'travel' && <TravelHistoryView />}
-      {searchMode === 'advanced' && <AdvancedScanView />}
+      {searchMode === 'advanced' && (
+        <div style={{ height: '600px' }}>
+          <GraphComponent data={sampleData} />
+        </div>
+      )}
 
       {searchMode === 'identity' && (
         <>
@@ -420,41 +555,69 @@ const SearchView = ({ profiles, addLog }) => {
 
           {!loading && result && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Identity Overview */}
-              <Card title="Identity Overview">
-                <div className="space-y-3">
-                  <DetailRow label="Full Name" value={result.personal.name} />
-                  <DetailRow label="DOB" value={result.personal.dob} />
-                  <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
-                  <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="text-gray-400">Criminal Record:</span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${result.personal.criminalRecord === 'Found' ? 'bg-red-900 text-red-300 animate-pulse' : 'bg-green-900 text-green-300'}`}>
-                      {result.personal.criminalRecord === 'Found' ? 'CRIMINAL RECORD FOUND' : 'CLEAR'}
-                    </span>
-                  </div>
-                </div>
-              </Card>
+              {/* Identity Profile - Merged Overview and Card History */}
+              <div className="col-span-1 md:col-span-2">
+                <Card title="Identity Profile">
+                  <div className="flex gap-6">
+                    {/* Profile Photo */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={result.personal.profilePhoto || "/profile.png"}
+                        alt="Profile"
+                        className="w-40 h-40 rounded-lg object-cover border-2 border-gray-600 shadow-lg"
+                      />
+                    </div>
 
-              {/* ID History */}
-              <Card title="Identity Card History">
-                <div className="mb-4">
-                  <DetailRow label="Issued" value={result.identity_card_history.issueDate} />
-                  <DetailRow label="Renewal" value={result.identity_card_history.renewalDate} />
-                </div>
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Change Log</h4>
-                <div className="space-y-2">
-                  {result.identity_card_history.history.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">No history recorded</p>
-                  ) : (
-                    result.identity_card_history.history.map((h, i) => (
-                      <div key={i} className="text-sm bg-gray-700/50 p-2 rounded">
-                        <span className="text-blue-400">{h.date}</span>: {h.change}
+                    {/* Personal Details - Left Column */}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Personal Information</h4>
+                        <DetailRow label="Full Name" value={result.personal.name} />
+                        <DetailRow label="CNIC" value={result.personal.cnic || "N/A"} />
+                        <DetailRow label="DOB" value={result.personal.dob} />
+                        <DetailRow label="Gender" value={result.personal.gender || "N/A"} />
+                        <DetailRow label="Nationality" value={result.personal.nationality || "N/A"} />
+                        <DetailRow label="Blood Group" value={result.personal.bloodGroup || "N/A"} />
+                        <DetailRow label="Marital Status" value={result.personal.maritalStatus || "N/A"} />
+                        <DetailRow label="Occupation" value={result.personal.occupation || "N/A"} />
+                        <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
+                        <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
+                        <div className="flex justify-between text-sm items-center pt-2">
+                          <span className="text-gray-400">Criminal Record:</span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${result.personal.criminalRecord === 'Found' ? 'bg-red-900 text-red-300 animate-pulse' : 'bg-green-900 text-green-300'}`}>
+                            {result.personal.criminalRecord === 'Found' ? 'CRIMINAL RECORD FOUND' : 'CLEAR'}
+                          </span>
+                        </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </Card>
+
+                      {/* Identity Card Details - Right Column */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Identity Card Details</h4>
+                        <DetailRow label="Card Number" value={result.identity_card_history.cardNumber || result.personal.cnic || "N/A"} />
+                        <DetailRow label="Issue Date" value={result.identity_card_history.issueDate} />
+                        <DetailRow label="Renewal Date" value={result.identity_card_history.renewalDate} />
+                        <DetailRow label="Expiry Date" value={result.identity_card_history.expiryDate || "N/A"} />
+                        <DetailRow label="Issuing Authority" value={result.identity_card_history.issuingAuthority || "NADRA"} />
+
+                        <div className="mt-4">
+                          <h5 className="text-xs font-semibold text-gray-400 mb-2 uppercase">Change History</h5>
+                          <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                            {result.identity_card_history.history.length === 0 ? (
+                              <p className="text-xs text-gray-500 italic">No history recorded</p>
+                            ) : (
+                              result.identity_card_history.history.map((h, i) => (
+                                <div key={i} className="text-xs bg-gray-700/50 p-2 rounded">
+                                  <span className="text-blue-400 font-medium">{h.date}</span>: {h.change}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
 
               {/* Assets Overview */}
               <Card title="Assets Overview">
