@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CDRView from './components/CDRView';
 import TravelHistoryView from './components/TravelHistoryView';
 import GraphComponent from './components/GraphComponent/GraphComponent';
+import SearchHistoryView from './components/SearchHistoryView';
 
 // --- DATA STRUCTURES ---
 
@@ -288,6 +289,14 @@ function App() {
   const [currentView, setCurrentView] = useState('home'); // home, search, audit
   const [auditLogs, setAuditLogs] = useState(INITIAL_AUDIT_LOGS);
 
+  // Search state - lifted to App level to persist across tab switches
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
+  const [searched, setSearched] = useState(false);
+  const [searchMode, setSearchMode] = useState('identity');
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
+  const [scanningConnections, setScanningConnections] = useState(false);
+
   // Login Handler
   const handleLogin = (username, password) => {
     const user = USERS.find(u => u.username === username && u.password === password);
@@ -330,7 +339,26 @@ function App() {
         <TopBar user={currentUser} onLogout={handleLogout} />
         <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-slate-900/50 to-gray-900/50">
           {currentView === 'home' && <HomeView setView={setCurrentView} />}
-          {currentView === 'search' && <SearchView profiles={PROFILES} addLog={(action) => addAuditLog(currentUser.username, action)} />}
+          {currentView === 'search' && (
+            <SearchView
+              profiles={PROFILES}
+              addLog={(action) => addAuditLog(currentUser.username, action)}
+              currentUser={currentUser}
+              // Pass search state as props
+              query={searchQuery}
+              setQuery={setSearchQuery}
+              result={searchResult}
+              setResult={setSearchResult}
+              searched={searched}
+              setSearched={setSearched}
+              searchMode={searchMode}
+              setSearchMode={setSearchMode}
+              showSearchHistory={showSearchHistory}
+              setShowSearchHistory={setShowSearchHistory}
+              scanningConnections={scanningConnections}
+              setScanningConnections={setScanningConnections}
+            />
+          )}
           {currentView === 'audit' && <AuditView logs={auditLogs} />}
         </main>
       </div>
@@ -461,19 +489,30 @@ const HomeView = ({ setView }) => (
   </div>
 );
 
-const SearchView = ({ profiles, addLog }) => {
-  const [query, setQuery] = useState('');
+const SearchView = ({
+  profiles,
+  addLog,
+  currentUser,
+  query,
+  setQuery,
+  result,
+  setResult,
+  searched,
+  setSearched,
+  searchMode,
+  setSearchMode,
+  showSearchHistory,
+  setShowSearchHistory,
+  scanningConnections,
+  setScanningConnections
+}) => {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [searched, setSearched] = useState(false);
-  const [searchMode, setSearchMode] = useState('identity'); // 'identity' or 'cdr' or 'travel' or 'advanced'
-  const [scanning, setScanning] = useState(false);
   const handleSearch = () => {
     if (!query) return;
     setLoading(true);
     setSearched(true);
     setResult(null);
-    setScanning(false);
+    setScanningConnections(false);
 
     // Simulate API call
     setTimeout(() => {
@@ -484,257 +523,283 @@ const SearchView = ({ profiles, addLog }) => {
     }, 1500);
   };
 
-  const handleAdvancedScan = () => {
-    setScanning(true);
+  const handleViewConnections = () => {
+    setScanningConnections(true);
     setTimeout(() => {
-      setScanning(false);
-      setSearchMode('advanced');
-    }, 2000);
+      setScanningConnections(false);
+      setSearchMode('connections');
+    }, 500);
   };
 
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-8 flex gap-4">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter CNIC or Mobile No."
-          className="flex-1 bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all backdrop-blur-sm"
+      {showSearchHistory ? (
+        <SearchHistoryView
+          profileId={query}
+          profileName={result?.personal?.name || 'Unknown'}
+          currentUser={currentUser}
+          onBack={() => setShowSearchHistory(false)}
         />
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
-        >
-          {loading ? 'Scanning...' : 'Search'}
-        </button>
-      </div>
-
-      {!loading && result && (
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => setSearchMode('identity')}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'identity'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 scale-105'
-                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
-              }`}
-          >
-            Identity Profile
-          </button>
-          <button
-            onClick={() => setSearchMode('cdr')}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'cdr'
-                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/30 scale-105'
-                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
-              }`}
-          >
-            CDR Intel
-          </button>
-          <button
-            onClick={() => setSearchMode('travel')}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'travel'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30 scale-105'
-                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
-              }`}
-          >
-            Travel History
-          </button>
-          <button
-            onClick={handleAdvancedScan}
-            disabled={scanning}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'advanced'
-                ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30 scale-105'
-                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {scanning ? 'Scanning...' : 'Advanced Scan'}
-          </button>
-        </div>
-      )}
-
-      {searchMode === 'cdr' && <CDRView />}
-      {searchMode === 'travel' && <TravelHistoryView />}
-      {searchMode === 'advanced' && (
-        <div style={{ height: '600px' }}>
-          <GraphComponent data={sampleData} />
-        </div>
-      )}
-
-      {searchMode === 'identity' && (
+      ) : (
         <>
-          {loading && (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-blue-400 animate-pulse">Running deep background checks...</p>
-            </div>
-          )}
-
-          {!loading && searched && !result && (
-            <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-8 text-center">
-              <h3 className="text-xl text-red-400 font-bold mb-2">Subject Not Found</h3>
-              <p className="text-gray-400">No records found for ID: {query}</p>
-            </div>
-          )}
+          <div className="mb-8 flex gap-4">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter CNIC or Mobile No."
+              className="flex-1 bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all backdrop-blur-sm"
+            />
+            <button
+              onClick={handleSearch}
+              disabled={loading}
+              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+            >
+              {loading ? 'Scanning...' : 'Search'}
+            </button>
+          </div>
 
           {!loading && result && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Identity Profile - Merged Overview and Card History */}
-              <div className="col-span-1 md:col-span-2">
-                <Card title="Identity Profile">
-                  <div className="flex gap-6">
-                    {/* Profile Photo */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src={result.personal.profilePhoto || "/profile.png"}
-                        alt="Profile"
-                        className="w-40 h-40 rounded-lg object-cover border-2 border-gray-600 shadow-lg"
-                      />
-                    </div>
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setSearchMode('identity')}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'identity'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 scale-105'
+                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+                  }`}
+              >
+                Identity Profile
+              </button>
+              <button
+                onClick={() => setSearchMode('cdr')}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'cdr'
+                  ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/30 scale-105'
+                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+                  }`}
+              >
+                CDR Intel
+              </button>
+              <button
+                onClick={() => setSearchMode('travel')}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'travel'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30 scale-105'
+                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+                  }`}
+              >
+                Travel History
+              </button>
+              <button
+                onClick={handleViewConnections}
+                disabled={scanningConnections}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'connections'
+                  ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30 scale-105'
+                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {scanningConnections ? 'Loading...' : 'See Connections'}
+              </button>
+            </div>
+          )}
 
-                    {/* Personal Details - Left Column */}
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Personal Information</h4>
-                        <DetailRow label="Full Name" value={result.personal.name} />
-                        <DetailRow label="CNIC" value={result.personal.cnic || "N/A"} />
-                        <DetailRow label="DOB" value={result.personal.dob} />
-                        <DetailRow label="Gender" value={result.personal.gender || "N/A"} />
-                        <DetailRow label="Nationality" value={result.personal.nationality || "N/A"} />
-                        <DetailRow label="Blood Group" value={result.personal.bloodGroup || "N/A"} />
-                        <DetailRow label="Marital Status" value={result.personal.maritalStatus || "N/A"} />
-                        <DetailRow label="Occupation" value={result.personal.occupation || "N/A"} />
-                        <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
-                        <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
-                        <div className="flex justify-between text-sm items-center pt-2">
-                          <span className="text-gray-400">Criminal Record:</span>
-                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${result.personal.criminalRecord === 'Found' ? 'bg-red-900 text-red-300 animate-pulse' : 'bg-green-900 text-green-300'}`}>
-                            {result.personal.criminalRecord === 'Found' ? 'CRIMINAL RECORD FOUND' : 'CLEAR'}
-                          </span>
-                        </div>
+          {searchMode === 'cdr' && <CDRView />}
+          {searchMode === 'travel' && <TravelHistoryView />}
+          {searchMode === 'connections' && (
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-6">Family and Connections View</h2>
+              <div style={{ height: '600px' }}>
+                <GraphComponent data={sampleData} />
+              </div>
+            </div>
+          )}
+
+          {searchMode === 'identity' && (
+            <>
+              {loading && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-blue-400 animate-pulse">Running deep background checks...</p>
+                </div>
+              )}
+
+              {!loading && searched && !result && (
+                <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-8 text-center">
+                  <h3 className="text-xl text-red-400 font-bold mb-2">Subject Not Found</h3>
+                  <p className="text-gray-400">No records found for ID: {query}</p>
+                </div>
+              )}
+
+              {!loading && result && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Identity Profile - Merged Overview and Card History */}
+                  <div className="col-span-1 md:col-span-2">
+                    <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-600/50">
+                      <div className="flex items-center justify-between mb-4 border-b border-gray-700/50 pb-2">
+                        <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Identity Profile</h3>
+                        <button
+                          onClick={() => setShowSearchHistory(true)}
+                          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg shadow-purple-500/30 transition-all duration-200 hover:scale-105"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Search History
+                        </button>
                       </div>
+                      <div className="flex gap-6">
+                        {/* Profile Photo */}
+                        <div className="flex-shrink-0">
+                          <img
+                            src={result.personal.profilePhoto || "/profile.png"}
+                            alt="Profile"
+                            className="w-40 h-40 rounded-lg object-cover border-2 border-gray-600 shadow-lg"
+                          />
+                        </div>
 
-                      {/* Identity Card Details - Right Column */}
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Identity Card Details</h4>
-                        <DetailRow label="Card Number" value={result.identity_card_history.cardNumber || result.personal.cnic || "N/A"} />
-                        <DetailRow label="Issue Date" value={result.identity_card_history.issueDate} />
-                        <DetailRow label="Renewal Date" value={result.identity_card_history.renewalDate} />
-                        <DetailRow label="Expiry Date" value={result.identity_card_history.expiryDate || "N/A"} />
-                        <DetailRow label="Issuing Authority" value={result.identity_card_history.issuingAuthority || "NADRA"} />
+                        {/* Personal Details - Left Column */}
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Personal Information</h4>
+                            <DetailRow label="Full Name" value={result.personal.name} />
+                            <DetailRow label="CNIC" value={result.personal.cnic || "N/A"} />
+                            <DetailRow label="DOB" value={result.personal.dob} />
+                            <DetailRow label="Gender" value={result.personal.gender || "N/A"} />
+                            <DetailRow label="Nationality" value={result.personal.nationality || "N/A"} />
+                            <DetailRow label="Blood Group" value={result.personal.bloodGroup || "N/A"} />
+                            <DetailRow label="Marital Status" value={result.personal.maritalStatus || "N/A"} />
+                            <DetailRow label="Occupation" value={result.personal.occupation || "N/A"} />
+                            <DetailRow label="Tax Status" value={result.personal.taxPayer ? "Active" : "Inactive"} />
+                            <DetailRow label="Last Known Location" value={result.personal.lastSeenLocation} />
+                            <div className="flex justify-between text-sm items-center pt-2">
+                              <span className="text-gray-400">Criminal Record:</span>
+                              <span className={`px-2 py-0.5 rounded text-xs font-bold ${result.personal.criminalRecord === 'Found' ? 'bg-red-900 text-red-300 animate-pulse' : 'bg-green-900 text-green-300'}`}>
+                                {result.personal.criminalRecord === 'Found' ? 'CRIMINAL RECORD FOUND' : 'CLEAR'}
+                              </span>
+                            </div>
+                          </div>
 
-                        <div className="mt-4">
-                          <h5 className="text-xs font-semibold text-gray-400 mb-2 uppercase">Change History</h5>
-                          <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                            {result.identity_card_history.history.length === 0 ? (
-                              <p className="text-xs text-gray-500 italic">No history recorded</p>
-                            ) : (
-                              result.identity_card_history.history.map((h, i) => (
-                                <div key={i} className="text-xs bg-gray-700/50 p-2 rounded">
-                                  <span className="text-blue-400 font-medium">{h.date}</span>: {h.change}
-                                </div>
-                              ))
-                            )}
+                          {/* Identity Card Details - Right Column */}
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-bold text-blue-400 uppercase mb-3 border-b border-gray-700 pb-1">Identity Card Details</h4>
+                            <DetailRow label="Card Number" value={result.identity_card_history.cardNumber || result.personal.cnic || "N/A"} />
+                            <DetailRow label="Issue Date" value={result.identity_card_history.issueDate} />
+                            <DetailRow label="Renewal Date" value={result.identity_card_history.renewalDate} />
+                            <DetailRow label="Expiry Date" value={result.identity_card_history.expiryDate || "N/A"} />
+                            <DetailRow label="Issuing Authority" value={result.identity_card_history.issuingAuthority || "NADRA"} />
+
+                            <div className="mt-4">
+                              <h5 className="text-xs font-semibold text-gray-400 mb-2 uppercase">Change History</h5>
+                              <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                                {result.identity_card_history.history.length === 0 ? (
+                                  <p className="text-xs text-gray-500 italic">No history recorded</p>
+                                ) : (
+                                  result.identity_card_history.history.map((h, i) => (
+                                    <div key={i} className="text-xs bg-gray-700/50 p-2 rounded">
+                                      <span className="text-blue-400 font-medium">{h.date}</span>: {h.change}
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </Card>
-              </div>
 
-              {/* Assets Overview */}
-              <Card title="Assets Overview">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-gray-700/30 p-4 rounded">
-                    <div className="text-2xl font-bold text-white">{result.assets.properties.length}</div>
-                    <div className="text-xs text-gray-400 uppercase">Properties</div>
-                  </div>
-                  <div className="bg-gray-700/30 p-4 rounded">
-                    <div className="text-2xl font-bold text-white">{result.assets.vehicles.length}</div>
-                    <div className="text-xs text-gray-400 uppercase">Vehicles</div>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Other Assets</h4>
-                  <ul className="list-disc list-inside text-sm text-gray-300">
-                    {result.assets.other_assets.map((asset, i) => (
-                      <li key={i}>{asset}</li>
-                    ))}
-                  </ul>
-                </div>
-              </Card>
-
-              {/* Online Presence */}
-              <Card title="Online Presence">
-                <div className={`p-3 rounded mb-4 text-center ${result.online_presence.isSellingAssetsOnline ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-900/50' : 'bg-green-900/30 text-green-400 border border-green-900/50'}`}>
-                  {result.online_presence.isSellingAssetsOnline ? '⚠ Active Seller Activity Detected' : '✓ No Suspicious Activity'}
-                </div>
-                {result.online_presence.platforms.map((p, i) => (
-                  <div key={i} className="flex justify-between items-center text-sm border-b border-gray-700 py-2 last:border-0">
-                    <span className="font-medium text-white">{p.platform}</span>
-                    <div className="text-right">
-                      <div className="text-gray-300">{p.items} items</div>
-                      <div className="text-xs text-gray-500">{p.lastActivity}</div>
+                  {/* Assets Overview */}
+                  <Card title="Assets Overview">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className="bg-gray-700/30 p-4 rounded">
+                        <div className="text-2xl font-bold text-white">{result.assets.properties.length}</div>
+                        <div className="text-xs text-gray-400 uppercase">Properties</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-4 rounded">
+                        <div className="text-2xl font-bold text-white">{result.assets.vehicles.length}</div>
+                        <div className="text-xs text-gray-400 uppercase">Vehicles</div>
+                      </div>
                     </div>
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-gray-400 mb-2">Other Assets</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-300">
+                        {result.assets.other_assets.map((asset, i) => (
+                          <li key={i}>{asset}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Card>
+
+                  {/* Online Presence */}
+                  <Card title="Online Presence">
+                    <div className={`p-3 rounded mb-4 text-center ${result.online_presence.isSellingAssetsOnline ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-900/50' : 'bg-green-900/30 text-green-400 border border-green-900/50'}`}>
+                      {result.online_presence.isSellingAssetsOnline ? '⚠ Active Seller Activity Detected' : '✓ No Suspicious Activity'}
+                    </div>
+                    {result.online_presence.platforms.map((p, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm border-b border-gray-700 py-2 last:border-0">
+                        <span className="font-medium text-white">{p.platform}</span>
+                        <div className="text-right">
+                          <div className="text-gray-300">{p.items} items</div>
+                          <div className="text-xs text-gray-500">{p.lastActivity}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </Card>
+
+                  {/* Detailed Lists (Full Width) */}
+                  <div className="col-span-1 md:col-span-2">
+                    <Card title="Property Details">
+                      {result.assets.properties.length === 0 ? <p className="text-gray-500 italic">No properties found.</p> : (
+                        <table className="w-full text-sm text-left">
+                          <thead className="text-gray-500 border-b border-gray-700">
+                            <tr>
+                              <th className="py-2">Type</th>
+                              <th className="py-2">Address</th>
+                              <th className="py-2">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-gray-300">
+                            {result.assets.properties.map((p, i) => (
+                              <tr key={i} className="border-b border-gray-700/50 last:border-0">
+                                <td className="py-2">{p.type}</td>
+                                <td className="py-2">{p.address}</td>
+                                <td className="py-2"><span className="bg-gray-700 px-2 py-0.5 rounded text-xs">{p.status}</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </Card>
                   </div>
-                ))}
-              </Card>
 
-              {/* Detailed Lists (Full Width) */}
-              <div className="col-span-1 md:col-span-2">
-                <Card title="Property Details">
-                  {result.assets.properties.length === 0 ? <p className="text-gray-500 italic">No properties found.</p> : (
-                    <table className="w-full text-sm text-left">
-                      <thead className="text-gray-500 border-b border-gray-700">
-                        <tr>
-                          <th className="py-2">Type</th>
-                          <th className="py-2">Address</th>
-                          <th className="py-2">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-gray-300">
-                        {result.assets.properties.map((p, i) => (
-                          <tr key={i} className="border-b border-gray-700/50 last:border-0">
-                            <td className="py-2">{p.type}</td>
-                            <td className="py-2">{p.address}</td>
-                            <td className="py-2"><span className="bg-gray-700 px-2 py-0.5 rounded text-xs">{p.status}</span></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </Card>
-              </div>
-
-              <div className="col-span-1 md:col-span-2">
-                <Card title="Criminal History">
-                  {(!result.criminalHistory || result.criminalHistory.length === 0) ? <p className="text-gray-500 italic">No criminal history recorded.</p> : (
-                    <table className="w-full text-sm text-left">
-                      <thead className="text-gray-500 border-b border-gray-700">
-                        <tr>
-                          <th className="py-2">Date</th>
-                          <th className="py-2">Offense</th>
-                          <th className="py-2">Police Station</th>
-                          <th className="py-2">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-gray-300">
-                        {result.criminalHistory.map((rec, i) => (
-                          <tr key={i} className="border-b border-gray-700/50 last:border-0">
-                            <td className="py-2 font-mono text-gray-400">{rec.date}</td>
-                            <td className="py-2 text-red-300">{rec.offense}</td>
-                            <td className="py-2">{rec.station}</td>
-                            <td className="py-2"><span className="bg-red-900/40 text-red-200 px-2 py-0.5 rounded text-xs border border-red-900">{rec.status}</span></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </Card>
-              </div>
-            </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <Card title="Criminal History">
+                      {(!result.criminalHistory || result.criminalHistory.length === 0) ? <p className="text-gray-500 italic">No criminal history recorded.</p> : (
+                        <table className="w-full text-sm text-left">
+                          <thead className="text-gray-500 border-b border-gray-700">
+                            <tr>
+                              <th className="py-2">Date</th>
+                              <th className="py-2">Offense</th>
+                              <th className="py-2">Police Station</th>
+                              <th className="py-2">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-gray-300">
+                            {result.criminalHistory.map((rec, i) => (
+                              <tr key={i} className="border-b border-gray-700/50 last:border-0">
+                                <td className="py-2 font-mono text-gray-400">{rec.date}</td>
+                                <td className="py-2 text-red-300">{rec.offense}</td>
+                                <td className="py-2">{rec.station}</td>
+                                <td className="py-2"><span className="bg-red-900/40 text-red-200 px-2 py-0.5 rounded text-xs border border-red-900">{rec.status}</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </Card>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
