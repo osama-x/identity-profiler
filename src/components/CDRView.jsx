@@ -25,7 +25,6 @@ const CDRView = () => (
     <div className="bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-700">
         <div className="p-4 border-b border-gray-700 flex justify-between items-center">
             <h3 className="text-lg font-bold text-white">Call Detail Records (CDR)</h3>
-            <span className="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">Live Feed</span>
         </div>
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

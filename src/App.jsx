@@ -324,11 +324,11 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white font-sans">
+    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-gray-950 to-slate-950 text-white font-sans">
       <Sidebar currentView={currentView} setView={setCurrentView} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar user={currentUser} onLogout={handleLogout} />
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-800">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-slate-900/50 to-gray-900/50">
           {currentView === 'home' && <HomeView setView={setCurrentView} />}
           {currentView === 'search' && <SearchView profiles={PROFILES} addLog={(action) => addAuditLog(currentUser.username, action)} />}
           {currentView === 'audit' && <AuditView logs={auditLogs} />}
@@ -341,9 +341,9 @@ function App() {
 // --- SUB-COMPONENTS (Placeholders for now) ---
 
 const LoginPage = ({ onLogin }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-900">
-    <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96 border border-gray-700">
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">Secure Portal Login</h2>
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950">
+    <div className="bg-gray-800/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-96 border border-gray-700/50 ring-1 ring-blue-500/20">
+      <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Secure Portal Login</h2>
       <LoginForm onLogin={onLogin} />
     </div>
   </div>
@@ -393,11 +393,12 @@ const LoginForm = ({ onLogin }) => {
 };
 
 const Sidebar = ({ currentView, setView }) => (
-  <div className="w-64 bg-gray-900 border-r border-gray-700 flex flex-col">
-    <div className="p-6">
-      <h1 className="text-xl font-bold text-blue-400 tracking-wider">INTEL PORTAL</h1>
+  <div className="w-64 bg-gradient-to-b from-gray-900 to-slate-900 border-r border-gray-700/50 flex flex-col shadow-2xl">
+    <div className="p-6 border-b border-gray-700/50">
+      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent tracking-wider">INTEL PORTAL</h1>
+      <div className="mt-2 h-1 w-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
     </div>
-    <nav className="flex-1 px-4 space-y-2">
+    <nav className="flex-1 px-4 py-6 space-y-2">
       <SidebarLink label="Home" active={currentView === 'home'} onClick={() => setView('home')} />
       <SidebarLink label="Identity Search" active={currentView === 'search'} onClick={() => setView('search')} />
       <SidebarLink label="Audit Logs" active={currentView === 'audit'} onClick={() => setView('audit')} />
@@ -408,7 +409,9 @@ const Sidebar = ({ currentView, setView }) => (
 const SidebarLink = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`w-full text-left px-4 py-3 rounded-md transition duration-200 ${active ? 'bg-blue-900/50 text-blue-300 border-l-4 border-blue-500' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+    className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${active
+      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105'
+      : 'text-gray-400 hover:bg-gray-800/50 hover:text-white hover:scale-102'
       }`}
   >
     {label}
@@ -416,8 +419,11 @@ const SidebarLink = ({ label, active, onClick }) => (
 );
 
 const TopBar = ({ user, onLogout }) => (
-  <header className="bg-gray-900 border-b border-gray-700 h-16 flex items-center justify-between px-6">
-    <div className="text-gray-400 text-sm">System Status: <span className="text-green-500">Online</span></div>
+  <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-700/50 h-16 flex items-center justify-between px-6 shadow-lg">
+    <div className="flex items-center gap-2">
+      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
+      <div className="text-gray-400 text-sm">System Status: <span className="text-green-400 font-medium">Online</span></div>
+    </div>
     <div className="flex items-center space-x-4">
       <div className="text-right">
         <div className="text-sm font-medium text-white">{user.name}</div>
@@ -425,7 +431,7 @@ const TopBar = ({ user, onLogout }) => (
       </div>
       <button
         onClick={onLogout}
-        className="bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1 rounded text-sm border border-red-900 transition"
+        className="bg-red-900/30 hover:bg-red-900/50 text-red-400 px-4 py-2 rounded-lg text-sm border border-red-900/50 transition-all hover:shadow-lg hover:shadow-red-500/20"
       >
         Logout
       </button>
@@ -435,13 +441,20 @@ const TopBar = ({ user, onLogout }) => (
 
 const HomeView = ({ setView }) => (
   <div className="h-full flex flex-col items-center justify-center text-center">
-    <h2 className="text-4xl font-bold text-white mb-4">Welcome to the Intelligence Portal</h2>
-    <p className="text-gray-400 max-w-md mb-8">
-      Access restricted identity databases and view system audit logs. All actions are monitored.
-    </p>
+    <div className="mb-8">
+      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-2xl shadow-blue-500/30 flex items-center justify-center">
+        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      </div>
+      <h2 className="text-4xl font-bold text-white mb-4">Welcome to the Intelligence Portal</h2>
+      <p className="text-gray-400 max-w-md mb-8">
+        Access restricted identity databases and view system audit logs. All actions are monitored.
+      </p>
+    </div>
     <button
       onClick={() => setView('search')}
-      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition duration-200"
+      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-all duration-200"
     >
       Start Identity Search
     </button>
@@ -488,12 +501,12 @@ const SearchView = ({ profiles, addLog }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Enter CNIC or Mobile No."
-          className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="flex-1 bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:outline-none transition-all backdrop-blur-sm"
         />
         <button
           onClick={handleSearch}
           disabled={loading}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-lg disabled:opacity-50 transition"
+          className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
         >
           {loading ? 'Scanning...' : 'Search'}
         </button>
@@ -503,26 +516,38 @@ const SearchView = ({ profiles, addLog }) => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setSearchMode('identity')}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'identity' ? 'bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'identity'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 scale-105'
+                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+              }`}
           >
             Identity Profile
           </button>
           <button
             onClick={() => setSearchMode('cdr')}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'cdr' ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'cdr'
+                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/30 scale-105'
+                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+              }`}
           >
             CDR Intel
           </button>
           <button
             onClick={() => setSearchMode('travel')}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'travel' ? 'bg-emerald-600 text-white shadow-lg ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'travel'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30 scale-105'
+                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+              }`}
           >
             Travel History
           </button>
           <button
             onClick={handleAdvancedScan}
             disabled={scanning}
-            className={`flex-1 py-3 rounded-lg font-bold transition ${searchMode === 'advanced' ? 'bg-fuchsia-600 text-white shadow-lg ring-2 ring-fuchsia-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'} disabled:opacity-50`}
+            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${searchMode === 'advanced'
+                ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30 scale-105'
+                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white border border-gray-700/50'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {scanning ? 'Scanning...' : 'Advanced Scan'}
           </button>
@@ -744,8 +769,8 @@ const AuditView = ({ logs }) => (
 );
 
 const Card = ({ title, children }) => (
-  <div className="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow-lg">
-    <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">{title}</h3>
+  <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-600/50">
+    <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-4 border-b border-gray-700/50 pb-2">{title}</h3>
     {children}
   </div>
 );
