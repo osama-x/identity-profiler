@@ -3,6 +3,7 @@ import CDRView from './components/CDRView';
 import TravelHistoryView from './components/TravelHistoryView';
 import GraphComponent from './components/GraphComponent/GraphComponent';
 import SearchHistoryView from './components/SearchHistoryView';
+import SurveillanceReportView from './components/SurveillanceReportView';
 
 // --- DATA STRUCTURES ---
 
@@ -297,6 +298,12 @@ function App() {
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const [scanningConnections, setScanningConnections] = useState(false);
 
+  // Surveillance state
+  const [surveillanceList, setSurveillanceList] = useState(['34428645236974']); // Pre-add one profile
+  const [showSurveillanceReport, setShowSurveillanceReport] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
   // Login Handler
   const handleLogin = (username, password) => {
     const user = USERS.find(u => u.username === username && u.password === password);
@@ -357,6 +364,15 @@ function App() {
               setShowSearchHistory={setShowSearchHistory}
               scanningConnections={scanningConnections}
               setScanningConnections={setScanningConnections}
+              // Pass surveillance state as props
+              surveillanceList={surveillanceList}
+              setSurveillanceList={setSurveillanceList}
+              showSurveillanceReport={showSurveillanceReport}
+              setShowSurveillanceReport={setShowSurveillanceReport}
+              showSuccessPopup={showSuccessPopup}
+              setShowSuccessPopup={setShowSuccessPopup}
+              successMessage={successMessage}
+              setSuccessMessage={setSuccessMessage}
             />
           )}
           {currentView === 'audit' && <AuditView logs={auditLogs} />}
@@ -504,9 +520,18 @@ const SearchView = ({
   showSearchHistory,
   setShowSearchHistory,
   scanningConnections,
-  setScanningConnections
+  setScanningConnections,
+  surveillanceList,
+  setSurveillanceList,
+  showSurveillanceReport,
+  setShowSurveillanceReport,
+  showSuccessPopup,
+  setShowSuccessPopup,
+  successMessage,
+  setSuccessMessage
 }) => {
   const [loading, setLoading] = useState(false);
+
   const handleSearch = () => {
     if (!query) return;
     setLoading(true);
@@ -531,15 +556,52 @@ const SearchView = ({
     }, 500);
   };
 
+  const handleToggleSurveillance = () => {
+    const isUnderSurveillance = surveillanceList.includes(query);
+
+    if (isUnderSurveillance) {
+      setSurveillanceList(surveillanceList.filter(id => id !== query));
+      setSuccessMessage('Subject removed from surveillance list');
+    } else {
+      setSurveillanceList([...surveillanceList, query]);
+      setSuccessMessage('Subject added to surveillance list');
+    }
+
+    setShowSuccessPopup(true);
+    setTimeout(() => setShowSuccessPopup(false), 3000);
+  };
+
+  const handleViewSurveillanceReport = () => {
+    setShowSurveillanceReport(true);
+  };
+
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed top-4 right-4 z-50 animate-slideIn">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 border border-green-400/30 flex items-center gap-3">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-semibold">{successMessage}</span>
+          </div>
+        </div>
+      )}
+
       {showSearchHistory ? (
         <SearchHistoryView
           profileId={query}
           profileName={result?.personal?.name || 'Unknown'}
           currentUser={currentUser}
           onBack={() => setShowSearchHistory(false)}
+        />
+      ) : showSurveillanceReport ? (
+        <SurveillanceReportView
+          profileId={query}
+          profileName={result?.personal?.name || 'Unknown'}
+          onBack={() => setShowSurveillanceReport(false)}
         />
       ) : (
         <>
@@ -636,15 +698,42 @@ const SearchView = ({
                     <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-600/50">
                       <div className="flex items-center justify-between mb-4 border-b border-gray-700/50 pb-2">
                         <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Identity Profile</h3>
-                        <button
-                          onClick={() => setShowSearchHistory(true)}
-                          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg shadow-purple-500/30 transition-all duration-200 hover:scale-105"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Search History
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleToggleSurveillance}
+                            className={`flex items-center gap-2 ${surveillanceList.includes(query)
+                                ? 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700'
+                                : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                              } text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg transition-all duration-200 hover:scale-105`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {surveillanceList.includes(query) ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              )}
+                            </svg>
+                            {surveillanceList.includes(query) ? 'Remove Surveillance' : 'Add to Surveillance'}
+                          </button>
+                          <button
+                            onClick={handleViewSurveillanceReport}
+                            className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg shadow-orange-500/30 transition-all duration-200 hover:scale-105"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            View Surveillance Report
+                          </button>
+                          <button
+                            onClick={() => setShowSearchHistory(true)}
+                            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg shadow-purple-500/30 transition-all duration-200 hover:scale-105"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Search History
+                          </button>
+                        </div>
                       </div>
                       <div className="flex gap-6">
                         {/* Profile Photo */}
